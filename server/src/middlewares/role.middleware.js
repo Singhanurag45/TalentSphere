@@ -10,3 +10,6 @@ export function authorizeRoles(allowedRoles) {
     return next();
   };
 }
+
+// Backward-compatible alias used in some route files.
+export const requireRole = authorizeRoles;

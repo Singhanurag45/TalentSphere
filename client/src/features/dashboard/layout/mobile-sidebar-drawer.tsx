@@ -4,17 +4,16 @@ import { NavLink } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { SIDEBAR_NAV_ITEMS } from "./navigation-config";
 import { cn } from "@/shared/lib/cn";
-import { useAuth } from "@/features/auth/context/auth-context";
 import { BrandLogo } from "@/shared/ui/brand-logo";
+import type { AppNavItem } from "@/app/navigation/types";
 
-export function MobileSidebarDrawer() {
+type MobileSidebarDrawerProps = {
+  items: AppNavItem[];
+};
+
+export function MobileSidebarDrawer({ items }: MobileSidebarDrawerProps) {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
-  const navItems = SIDEBAR_NAV_ITEMS.filter(
-    (item) => user && item.roles.includes(user.role),
-  );
 
   return (
     <>
@@ -57,9 +56,9 @@ export function MobileSidebarDrawer() {
               </div>
 
               <nav className="space-y-2">
-                {navItems.map((item) => (
+                {items.map((item) => (
                   <NavLink
-                    key={item.label}
+                    key={item.href}
                     to={item.href}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>

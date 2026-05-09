@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/app/providers/theme-provider";
 import { useAuth } from "@/features/auth/context/auth-context";
 import { BrandLogo } from "@/shared/ui/brand-logo";
+import { resolvePageTitle } from "@/app/navigation";
 
 const searchSchema = z.object({
   query: z.string().min(2, "Type at least 2 characters"),
@@ -20,7 +22,11 @@ type SearchFormInput = z.infer<typeof searchSchema>;
 export function TopNavbar() {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const pageTitle =
+    user ? resolvePageTitle(location.pathname, user.role) : "Sign in";
   const { register, handleSubmit, formState } = useForm<SearchFormInput>({
     resolver: zodResolver(searchSchema),
     defaultValues: { query: "" },
@@ -33,7 +39,12 @@ export function TopNavbar() {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="container flex h-16 items-center gap-3">
-        <BrandLogo withLabel={false} className="hidden shrink-0 md:flex" />
+        <div className="min-w-0 shrink-0">
+          <BrandLogo withLabel={false} className="hidden md:flex" />
+          <p className="truncate text-sm font-semibold tracking-tight text-foreground md:mt-1 md:text-xs md:font-medium md:text-muted-foreground">
+            {pageTitle}
+          </p>
+        </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="relative w-full max-w-xl"

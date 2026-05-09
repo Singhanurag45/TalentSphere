@@ -10,6 +10,18 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: Object.values(ROLES), default: ROLES.EMPLOYEE },
     isActive: { type: Boolean, default: true },
+    avatarUrl: { type: String, trim: true, default: "" },
+    preferences: {
+      theme: {
+        type: String,
+        enum: ["light", "dark", "system"],
+        default: "system",
+      },
+      emailLeaveUpdates: { type: Boolean, default: true },
+      emailAttendanceSummary: { type: Boolean, default: true },
+      emailAnnouncements: { type: Boolean, default: true },
+      pushEnabled: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );

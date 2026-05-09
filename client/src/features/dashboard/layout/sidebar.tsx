@@ -1,17 +1,15 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 
-import { SIDEBAR_NAV_ITEMS } from "./navigation-config";
 import { cn } from "@/shared/lib/cn";
-import { useAuth } from "@/features/auth/context/auth-context";
 import { BrandLogo } from "@/shared/ui/brand-logo";
+import type { AppNavItem } from "@/app/navigation/types";
 
-export function Sidebar() {
-  const { user } = useAuth();
-  const navItems = SIDEBAR_NAV_ITEMS.filter(
-    (item) => user && item.roles.includes(user.role),
-  );
+type SidebarProps = {
+  items: AppNavItem[];
+};
 
+export function Sidebar({ items }: SidebarProps) {
   return (
     <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:block">
       <div className="mb-8 px-2">
@@ -19,9 +17,9 @@ export function Sidebar() {
       </div>
 
       <nav className="space-y-1.5">
-        {navItems.map((item, index) => (
+        {items.map((item, index) => (
           <motion.div
-            key={item.label}
+            key={item.href}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.04 }}
