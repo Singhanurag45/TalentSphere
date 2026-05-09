@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SIDEBAR_NAV_ITEMS } from "./navigation-config";
 import { cn } from "@/shared/lib/cn";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { BrandLogo } from "@/shared/ui/brand-logo";
 
 export function MobileSidebarDrawer() {
   const [open, setOpen] = useState(false);
@@ -38,10 +39,7 @@ export function MobileSidebarDrawer() {
               className="fixed inset-y-0 left-0 z-50 w-[280px] border-r bg-card p-4"
             >
               <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">TalentSphere</p>
-                  <h2 className="text-lg font-semibold">Menu</h2>
-                </div>
+                <BrandLogo withLabel={false} />
                 <Button size="icon" variant="ghost" onClick={() => setOpen(false)}>
                   <X className="h-5 w-5" />
                 </Button>

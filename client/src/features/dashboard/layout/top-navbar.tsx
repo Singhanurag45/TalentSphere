@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/app/providers/theme-provider";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { BrandLogo } from "@/shared/ui/brand-logo";
 
 const searchSchema = z.object({
   query: z.string().min(2, "Type at least 2 characters"),
@@ -32,6 +33,7 @@ export function TopNavbar() {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="container flex h-16 items-center gap-3">
+        <BrandLogo withLabel={false} className="hidden shrink-0 md:flex" />
         <form onSubmit={handleSubmit(onSubmit)} className="relative w-full max-w-xl">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input

@@ -5,12 +5,16 @@ import { DashboardHome } from "@/features/dashboard/pages/dashboard-home";
 import { LoginPage } from "@/features/auth/pages/login-page";
 import { ProtectedRoute } from "@/features/auth/components/protected-route";
 import { RoleRoute } from "@/features/auth/components/role-route";
+import { EmployeesPage } from "@/features/employees/pages/employees-page";
+import { EmployeeProfilePage } from "@/features/employees/pages/employee-profile-page";
 import { ROLES } from "@/shared/config/roles";
 
 const Placeholder = ({ title }: { title: string }) => (
   <div className="rounded-2xl border bg-card p-6 shadow-soft">
     <h1 className="text-xl font-semibold">{title}</h1>
-    <p className="mt-2 text-sm text-muted-foreground">Module shell ready. Add feature pages next.</p>
+    <p className="mt-2 text-sm text-muted-foreground">
+      Module shell ready. Add feature pages next.
+    </p>
   </div>
 );
 
@@ -35,7 +39,15 @@ export const router = createBrowserRouter([
         path: "/employees",
         element: (
           <RoleRoute allow={[ROLES.ADMIN]}>
-            <Placeholder title="Employees" />
+            <EmployeesPage />
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "/employees/:employeeId",
+        element: (
+          <RoleRoute allow={[ROLES.ADMIN]}>
+            <EmployeeProfilePage />
           </RoleRoute>
         ),
       },

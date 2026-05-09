@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { SIDEBAR_NAV_ITEMS } from "./navigation-config";
 import { cn } from "@/shared/lib/cn";
 import { useAuth } from "@/features/auth/context/auth-context";
+import { BrandLogo } from "@/shared/ui/brand-logo";
 
 export function Sidebar() {
   const { user } = useAuth();
@@ -12,8 +13,7 @@ export function Sidebar() {
   return (
     <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:block">
       <div className="mb-8 px-2">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">TalentSphere</p>
-        <h1 className="mt-1 text-lg font-semibold">People Ops</h1>
+        <BrandLogo />
       </div>
 
       <nav className="space-y-1.5">

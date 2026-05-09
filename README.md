@@ -1,4 +1,4 @@
-# NewHRMS Monorepo Scaffold
+# TalentSphere Monorepo Scaffold
 
 This workspace is split into:
 - `client/` -> React + Vite frontend

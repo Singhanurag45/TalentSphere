@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BrandLogo } from "@/shared/ui/brand-logo";
 import { useAuth } from "../context/auth-context";
 
 const loginSchema = z.object({
@@ -57,7 +58,7 @@ export function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 w-full max-w-md rounded-[1.5rem] border bg-card/90 p-8 shadow-float backdrop-blur"
       >
-        <p className="text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground">TalentSphere</p>
+        <BrandLogo className="mb-2" />
         <h1 className="mt-3 text-2xl font-semibold tracking-tight">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Secure sign in for your HRMS workspace.
