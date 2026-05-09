@@ -42,8 +42,12 @@ npm run dev
 - Email: `employee.guest@newhrms.com`
 - Password: `Employee@123`
 
-## Leave Management Module
+## Core Modules
 
+### 1) Employee Dashboard Flow
+A comprehensive employee-facing interface providing access to modules such as attendance, profile settings, and internal dashboards.
+
+### 2) Leave Management Module
 Implemented leave workflow with role-based access and responsive UI.
 
 ### Features
