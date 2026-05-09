@@ -74,18 +74,26 @@ export async function rotateRefreshToken({ rawRefreshToken, userAgent = "", ipAd
   }
 
   const oldTokenHash = hashToken(rawRefreshToken);
-  const session = await RefreshToken.findOne({ tokenHash: oldTokenHash, revokedAt: null }).exec();
+  const session = await RefreshToken.findOne({ tokenHash: oldTokenHash }).exec();
   if (!session) {
     throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Refresh token session is invalid");
+  }
+
+  if (session.revokedAt) {
+    const timeSinceRevoked = Date.now() - session.revokedAt.getTime();
+    if (timeSinceRevoked > 15000) {
+      // It was revoked more than 15 seconds ago. Token is invalid.
+      throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Refresh token session is invalid");
+    }
+  } else {
+    session.revokedAt = new Date();
+    await session.save();
   }
 
   const user = await User.findById(payload.sub).exec();
   if (!user || !user.isActive) {
     throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "User is not active");
   }
-
-  session.revokedAt = new Date();
-  await session.save();
 
   const accessToken = signAccessToken({ sub: user.id, role: user.role, email: user.email });
   const refreshToken = signRefreshToken({ sub: user.id, role: user.role });

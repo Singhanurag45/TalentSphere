@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { listLeaves } from "../api/leave-api";
 import { LeaveCard } from "../components/leave-card";
@@ -30,19 +30,30 @@ export function LeaveHistoryPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leave History</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            View all your leave applications
-          </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leave History</h1>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              View all your leave applications
+            </p>
+          </div>
         </div>
+        {!selectedLeave && (
+          <button
+            onClick={() => navigate("/leaves/apply")}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Apply Leave
+          </button>
+        )}
       </div>
 
       {selectedLeave ? (

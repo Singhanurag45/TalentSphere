@@ -153,7 +153,7 @@ export async function applyLeave(payload, authUser) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy").exec();
+  return leave.populate("employee appliedBy approvedBy");
 }
 
 export async function approveLeave(leaveId, approverUser, comment) {
@@ -199,7 +199,7 @@ export async function approveLeave(leaveId, approverUser, comment) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy").exec();
+  return leave.populate("employee appliedBy approvedBy");
 }
 
 export async function rejectLeave(leaveId, approverUser, rejectionReason) {
@@ -236,7 +236,7 @@ export async function rejectLeave(leaveId, approverUser, rejectionReason) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy").exec();
+  return leave.populate("employee appliedBy approvedBy");
 }
 
 export async function cancelLeave(leaveId, requesterUser, reason) {
@@ -295,7 +295,7 @@ export async function cancelLeave(leaveId, requesterUser, reason) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy").exec();
+  return leave.populate("employee appliedBy approvedBy");
 }
 
 export async function addLeaveComment(leaveId, authorUser, commentText) {
