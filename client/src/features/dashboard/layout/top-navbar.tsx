@@ -34,7 +34,10 @@ export function TopNavbar() {
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="container flex h-16 items-center gap-3">
         <BrandLogo withLabel={false} className="hidden shrink-0 md:flex" />
-        <form onSubmit={handleSubmit(onSubmit)} className="relative w-full max-w-xl">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="relative w-full max-w-xl"
+        >
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             {...register("query")}
@@ -45,7 +48,11 @@ export function TopNavbar() {
         </form>
 
         <Button variant="outline" size="icon" onClick={toggleTheme}>
-          {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          {theme === "light" ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
         </Button>
 
         <Button variant="outline" size="icon" className="relative">
@@ -54,7 +61,11 @@ export function TopNavbar() {
         </Button>
 
         <div className="relative">
-          <Button variant="outline" className="h-11 gap-2 px-2.5" onClick={() => setMenuOpen((v) => !v)}>
+          <Button
+            variant="outline"
+            className="h-11 gap-2 px-2.5"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
             <img
               src="https://i.pravatar.cc/80?img=12"
               alt="Profile"
@@ -70,7 +81,9 @@ export function TopNavbar() {
             <div className="absolute right-0 top-12 z-40 w-52 rounded-2xl border bg-card p-1 shadow-float">
               <div className="px-3 py-2">
                 <p className="text-sm font-medium">{user?.email}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {user?.role}
+                </p>
               </div>
               <button
                 className="w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-muted"

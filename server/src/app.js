@@ -18,6 +18,14 @@ export function createApp() {
   app.use(securityMiddleware);
   app.use(requestLoggerMiddleware);
 
+  app.get("/", (_req, res) => {
+    res.status(200).json({
+      status: "ok",
+      message: "NewHRMS API is running",
+      health: `${env.API_PREFIX}/${env.API_VERSION}/health`,
+    });
+  });
+
   app.use(`${env.API_PREFIX}/${env.API_VERSION}`, apiRouter);
 
   app.use(notFoundMiddleware);

@@ -25,7 +25,9 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || "/";
+  const redirectTo =
+    (location.state as { from?: { pathname?: string } } | null)?.from
+      ?.pathname || "/";
 
   const {
     register,
@@ -59,7 +61,9 @@ export function LoginPage() {
         className="relative z-10 w-full max-w-md rounded-[1.5rem] border bg-card/90 p-8 shadow-float backdrop-blur"
       >
         <BrandLogo className="mb-2" />
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight">Welcome back</h1>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+          Welcome back
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Secure sign in for your HRMS workspace.
         </p>
@@ -68,13 +72,21 @@ export function LoginPage() {
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Work Email</label>
             <Input placeholder="you@company.com" {...register("email")} />
-            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-xs text-red-500">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Password</label>
-            <Input type="password" placeholder="Enter password" {...register("password")} />
-            {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
+            <Input
+              type="password"
+              placeholder="Enter password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-xs text-red-500">{errors.password.message}</p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>

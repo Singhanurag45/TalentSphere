@@ -8,7 +8,9 @@ import { BrandLogo } from "@/shared/ui/brand-logo";
 
 export function Sidebar() {
   const { user } = useAuth();
-  const navItems = SIDEBAR_NAV_ITEMS.filter((item) => user && item.roles.includes(user.role));
+  const navItems = SIDEBAR_NAV_ITEMS.filter(
+    (item) => user && item.roles.includes(user.role),
+  );
 
   return (
     <aside className="hidden border-r bg-card/70 p-4 backdrop-blur lg:block">
@@ -31,7 +33,7 @@ export function Sidebar() {
                   "flex h-11 items-center gap-3 rounded-full px-4 text-sm transition",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-soft"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )
               }
             >

@@ -12,11 +12,18 @@ import { BrandLogo } from "@/shared/ui/brand-logo";
 export function MobileSidebarDrawer() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
-  const navItems = SIDEBAR_NAV_ITEMS.filter((item) => user && item.roles.includes(user.role));
+  const navItems = SIDEBAR_NAV_ITEMS.filter(
+    (item) => user && item.roles.includes(user.role),
+  );
 
   return (
     <>
-      <Button size="icon" variant="outline" className="lg:hidden" onClick={() => setOpen(true)}>
+      <Button
+        size="icon"
+        variant="outline"
+        className="lg:hidden"
+        onClick={() => setOpen(true)}
+      >
         <Menu className="h-5 w-5" />
       </Button>
 
@@ -40,7 +47,11 @@ export function MobileSidebarDrawer() {
             >
               <div className="mb-6 flex items-center justify-between">
                 <BrandLogo withLabel={false} />
-                <Button size="icon" variant="ghost" onClick={() => setOpen(false)}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setOpen(false)}
+                >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
@@ -56,7 +67,7 @@ export function MobileSidebarDrawer() {
                         "flex h-11 items-center gap-3 rounded-full px-4 text-sm transition",
                         isActive
                           ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
                       )
                     }
                   >

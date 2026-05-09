@@ -9,9 +9,14 @@ type BrandLogoProps = {
   to?: string;
 };
 
-export function BrandLogo({ withLabel = true, className, to = "/" }: BrandLogoProps) {
+export function BrandLogo({
+  withLabel = true,
+  className,
+  to = "/",
+}: BrandLogoProps) {
   const { theme } = useTheme();
-  const logoSrc = theme === "dark" ? "/dark-mode-logo.png" : "/light-mode-logo.png";
+  const logoSrc =
+    theme === "dark" ? "/dark-mode-logo.png" : "/light-mode-logo.png";
 
   return (
     <Link to={to} className={cn("inline-flex items-center gap-3", className)}>
