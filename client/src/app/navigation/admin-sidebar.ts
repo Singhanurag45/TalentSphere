@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   CalendarCheck2,
   LayoutDashboard,
   LineChart,
@@ -36,11 +35,6 @@ export const ADMIN_SIDEBAR: RoleNavDefinition = {
       pageTitle: "Leave Approvals",
       icon: CalendarCheck2,
       href: "/leaves/approvals",
-    },
-    {
-      label: "Reports",
-      icon: BarChart3,
-      href: "/reports",
     },
     {
       label: "Analytics",

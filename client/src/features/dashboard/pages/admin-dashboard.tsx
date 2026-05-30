@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 
 import { KpiCard } from "../components/kpi-card";
 import { DashboardSkeleton } from "../components/dashboard-skeleton";
 import { AttendanceAnalyticsChart } from "../components/charts/attendance-analytics-chart";
 import { TeamPerformanceChart } from "../components/charts/team-performance-chart";
+import { listLeaves } from "@/features/leave/api/leave-api";
+import { LeaveStatusBadge } from "@/features/leave/components/leave-status-badge";
+import { LEAVE_TYPE_LABELS } from "@/features/leave/types/leave";
 
-const kpiCards = [
+const baseKpiCards = [
   { title: "Employee Count", value: "248", change: "+8 this month", toneClassName: "bg-primary-soft" },
   { title: "Attendance Summary", value: "94.2%", change: "12 late check-ins", toneClassName: "bg-sky-50 dark:bg-sky-950/40" },
-  { title: "Leave Summary", value: "14 Active", change: "6 pending approvals", toneClassName: "bg-violet-50 dark:bg-violet-950/40" },
   { title: "Active Employees", value: "226", change: "91% currently online", toneClassName: "bg-emerald-50 dark:bg-emerald-950/40" },
 ];
 
@@ -31,15 +34,20 @@ const teamPerformance = [
   { team: "Support", score: 88 },
 ];
 
-const leaveRequests = [
-  { employee: "Aarav Sharma", type: "Sick Leave", days: "2 days", status: "Pending" },
-  { employee: "Neha Kapoor", type: "Annual Leave", days: "5 days", status: "Approved" },
-  { employee: "Rohan Mehta", type: "Casual Leave", days: "1 day", status: "Pending" },
-  { employee: "Isha Verma", type: "Annual Leave", days: "3 days", status: "Pending" },
-];
-
 export function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
+  const leaveQuery = useQuery({
+    queryKey: ["dashboard", "leaves"],
+    queryFn: () => listLeaves({ page: 1, limit: 5 }),
+  });
+  const pendingLeaveQuery = useQuery({
+    queryKey: ["dashboard", "leaves", "pending"],
+    queryFn: () => listLeaves({ page: 1, limit: 1, status: "pending" }),
+  });
+  const approvedLeaveQuery = useQuery({
+    queryKey: ["dashboard", "leaves", "approved"],
+    queryFn: () => listLeaves({ page: 1, limit: 1, status: "approved" }),
+  });
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIsLoading(false), 850);
@@ -49,6 +57,21 @@ export function AdminDashboard() {
   if (isLoading) {
     return <DashboardSkeleton />;
   }
+
+  const pendingLeaves = pendingLeaveQuery.data?.meta.total ?? 0;
+  const activeLeaves = approvedLeaveQuery.data?.meta.total ?? 0;
+  const kpiCards = [
+    ...baseKpiCards.slice(0, 2),
+    {
+      title: "Leave Summary",
+      value: approvedLeaveQuery.isLoading ? "-" : `${activeLeaves} Approved`,
+      change: pendingLeaveQuery.isLoading
+        ? "Loading approvals"
+        : `${pendingLeaves} pending approval${pendingLeaves === 1 ? "" : "s"}`,
+      toneClassName: "bg-violet-50 dark:bg-violet-950/40",
+    },
+    baseKpiCards[2],
+  ];
 
   return (
     <div className="space-y-6">
@@ -89,15 +112,25 @@ export function AdminDashboard() {
         >
           <h2 className="text-lg font-semibold">Recent Leave Requests</h2>
           <div className="mt-4 space-y-3">
-            {leaveRequests.map((request) => (
-              <div key={`${request.employee}-${request.type}`} className="rounded-xl border bg-muted/30 p-3">
-                <p className="text-sm font-medium">{request.employee}</p>
-                <p className="text-xs text-muted-foreground">
-                  {request.type} · {request.days}
-                </p>
-                <p className="mt-1 text-xs font-medium text-primary">{request.status}</p>
-              </div>
-            ))}
+            {leaveQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading leave requests...</p>
+            ) : !leaveQuery.data?.items.length ? (
+              <p className="text-sm text-muted-foreground">No leave requests yet</p>
+            ) : (
+              leaveQuery.data.items.map((request) => (
+                <div key={request._id} className="rounded-xl border bg-muted/30 p-3">
+                  <p className="text-sm font-medium">
+                    {request.employee.firstName} {request.employee.lastName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {LEAVE_TYPE_LABELS[request.leaveType]} - {request.daysRequested} day{request.daysRequested === 1 ? "" : "s"}
+                  </p>
+                  <div className="mt-2">
+                    <LeaveStatusBadge status={request.status} className="px-2 py-0.5 text-xs" />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </motion.div>
       </section>

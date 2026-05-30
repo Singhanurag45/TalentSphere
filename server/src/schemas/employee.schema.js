@@ -22,7 +22,9 @@ const employeeBodySchema = z.object({
 });
 
 export const createEmployeeSchema = z.object({
-  body: employeeBodySchema,
+  body: employeeBodySchema.extend({
+    password: z.string().min(8).max(72),
+  }),
   params: z.object({}).default({}),
   query: z.object({}).default({}),
 });

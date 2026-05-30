@@ -1,4 +1,9 @@
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+
+import { ROLES } from "../constants/roles.js";
 import { Employee } from "../models/employee.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { HTTP_STATUS } from "../constants/http-status.js";
 
@@ -41,15 +46,47 @@ function handleDuplicateError(error) {
 }
 
 export async function createEmployee(payload) {
+  const { password, ...employeePayload } = payload;
+  const session = await mongoose.startSession();
+
   try {
-    const employee = await Employee.create({
-      ...payload,
-      employeeCode: payload.employeeCode.toUpperCase(),
+    let createdEmployee;
+
+    await session.withTransaction(async () => {
+      const [employee] = await Employee.create(
+        [
+          {
+            ...employeePayload,
+            employeeCode: employeePayload.employeeCode.toUpperCase(),
+          },
+        ],
+        { session },
+      );
+
+      const passwordHash = await bcrypt.hash(password, 12);
+      await User.create(
+        [
+          {
+            firstName: employeePayload.firstName,
+            lastName: employeePayload.lastName,
+            email: employeePayload.email,
+            passwordHash,
+            role: ROLES.EMPLOYEE,
+            isActive: employeePayload.status !== "inactive",
+            avatarUrl: employeePayload.avatarUrl || "",
+          },
+        ],
+        { session },
+      );
+
+      createdEmployee = employee;
     });
 
-    return sanitizeEmployee(employee);
+    return sanitizeEmployee(createdEmployee);
   } catch (error) {
     handleDuplicateError(error);
+  } finally {
+    await session.endSession();
   }
 }
 

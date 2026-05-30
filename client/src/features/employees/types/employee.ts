@@ -30,6 +30,7 @@ export type EmployeePayload = {
   firstName: string;
   lastName: string;
   email: string;
+  password?: string;
   phone?: string;
   department: string;
   designation: string;

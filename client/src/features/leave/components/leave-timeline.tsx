@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import {
   CheckCircle2,
+  CircleOff,
   XCircle,
   Clock3,
   FileText,
@@ -43,6 +44,18 @@ export function LeaveTimeline({ leave }: LeaveTimelineProps) {
             description: `${leave.rejectionReason}`,
             icon: XCircle,
             color: "bg-rose-100 dark:bg-rose-950",
+          },
+        ]
+      : []),
+    ...(leave.status === "cancelled"
+      ? [
+          {
+            type: "cancelled",
+            date: leave.updatedAt,
+            title: "Leave Cancelled",
+            description: "This leave request was cancelled",
+            icon: CircleOff,
+            color: "bg-slate-100 dark:bg-slate-950",
           },
         ]
       : []),

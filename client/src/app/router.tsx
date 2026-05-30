@@ -118,14 +118,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/reports",
-        element: (
-          <RoleRoute allow={[ROLES.ADMIN]}>
-            <Placeholder title="Reports" />
-          </RoleRoute>
-        ),
-      },
-      {
         path: "/me/profile",
         element: (
           <RoleRoute allow={[ROLES.EMPLOYEE]}>

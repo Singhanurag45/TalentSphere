@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Plus, Clock, FileText } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "@/features/auth/context/auth-context";
+import { getLeaveBalance } from "@/features/leave/api/leave-api";
 import { KpiCard } from "../components/kpi-card";
 import { DashboardSkeleton } from "../components/dashboard-skeleton";
 
@@ -22,6 +24,11 @@ export function EmployeeDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { data: leaveBalance, isLoading: isLeaveBalanceLoading } = useQuery({
+    queryKey: ["leaveBalance", "dashboard"],
+    queryFn: () => getLeaveBalance(),
+    refetchInterval: 30000,
+  });
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIsLoading(false), 850);
@@ -31,6 +38,15 @@ export function EmployeeDashboard() {
   if (isLoading) {
     return <DashboardSkeleton />;
   }
+
+  const totals = Object.values(leaveBalance?.leaveTypes || {}).reduce(
+    (sum, balance) => ({
+      available: sum.available + balance.allocated - balance.used - balance.pending,
+      pending: sum.pending + balance.pending,
+      used: sum.used + balance.used,
+    }),
+    { available: 0, pending: 0, used: 0 },
+  );
 
   return (
     <div className="space-y-6">
@@ -55,8 +71,20 @@ export function EmployeeDashboard() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <KpiCard title="Available Leaves" value="12 Days" change="Annual & Sick" toneClassName="bg-sky-50 dark:bg-sky-950/40" delay={0} />
-        <KpiCard title="Pending Requests" value="0" change="All clear" toneClassName="bg-emerald-50 dark:bg-emerald-950/40" delay={0.05} />
+        <KpiCard
+          title="Available Leaves"
+          value={isLeaveBalanceLoading ? "-" : `${totals.available} Days`}
+          change={`${totals.used} used`}
+          toneClassName="bg-sky-50 dark:bg-sky-950/40"
+          delay={0}
+        />
+        <KpiCard
+          title="Pending Requests"
+          value={isLeaveBalanceLoading ? "-" : String(totals.pending)}
+          change={totals.pending > 0 ? "Awaiting approval" : "All clear"}
+          toneClassName="bg-emerald-50 dark:bg-emerald-950/40"
+          delay={0.05}
+        />
         <KpiCard title="Next Holiday" value="Aug 15" change="Independence Day" toneClassName="bg-violet-50 dark:bg-violet-950/40" delay={0.1} />
       </section>
 

@@ -2,9 +2,12 @@ import { HTTP_STATUS } from "../constants/http-status.js";
 import { Leave } from "../models/leave.model.js";
 import { LeaveBalance } from "../models/leave-balance.model.js";
 import { Employee } from "../models/employee.model.js";
-import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/api-error.js";
 import { ROLES } from "../constants/roles.js";
+import {
+  notifyAdminsOfLeaveRequest,
+  notifyEmployeeLeaveDecision,
+} from "./notification.service.js";
 
 function getAuthUserId(authUser) {
   return authUser?.sub || authUser?.id;
@@ -153,7 +156,10 @@ export async function applyLeave(payload, authUser) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy");
+  const populatedLeave = await leave.populate("employee appliedBy approvedBy");
+  await notifyAdminsOfLeaveRequest(populatedLeave);
+
+  return populatedLeave;
 }
 
 export async function approveLeave(leaveId, approverUser, comment) {
@@ -199,7 +205,10 @@ export async function approveLeave(leaveId, approverUser, comment) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy");
+  const populatedLeave = await leave.populate("employee appliedBy approvedBy");
+  await notifyEmployeeLeaveDecision(populatedLeave, "approved");
+
+  return populatedLeave;
 }
 
 export async function rejectLeave(leaveId, approverUser, rejectionReason) {
@@ -236,7 +245,10 @@ export async function rejectLeave(leaveId, approverUser, rejectionReason) {
     },
   );
 
-  return leave.populate("employee appliedBy approvedBy");
+  const populatedLeave = await leave.populate("employee appliedBy approvedBy");
+  await notifyEmployeeLeaveDecision(populatedLeave, "rejected");
+
+  return populatedLeave;
 }
 
 export async function cancelLeave(leaveId, requesterUser, reason) {
@@ -320,16 +332,22 @@ export async function addLeaveComment(leaveId, authorUser, commentText) {
 }
 
 export async function getLeaveBalance(employeeId, fiscalYear) {
-  const balance = await LeaveBalance.findOne({
-    employee: employeeId,
-    fiscal_year: fiscalYear || getCurrentFiscalYear(),
-  }).populate("employee");
-
-  if (!balance) {
-    throw new ApiError(HTTP_STATUS.NOT_FOUND, "Leave balance not found");
+  let employeeFilterId = employeeId;
+  if (typeof employeeId === "string" && employeeId.includes("@")) {
+    const employee = await Employee.findOne({ email: employeeId }).select("_id");
+    employeeFilterId = employee?._id;
   }
 
-  return balance;
+  if (!employeeFilterId) {
+    throw new ApiError(HTTP_STATUS.NOT_FOUND, "Employee record not found");
+  }
+
+  const balance = await getOrCreateLeaveBalance(
+    employeeFilterId,
+    fiscalYear || getCurrentFiscalYear(),
+  );
+
+  return balance.populate("employee");
 }
 
 export async function listLeaves(query, authUser) {

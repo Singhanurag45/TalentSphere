@@ -1,23 +1,112 @@
 # TalentSphere HRMS
 
-Monorepo for the TalentSphere HRMS platform.
+TalentSphere HRMS is a full-stack Human Resource Management System for managing employees, attendance, leave workflows, dashboards, reports, and organization settings.
+
+The project is organized as a monorepo with a React frontend and an Express/MongoDB backend.
+
+## Tech Stack
+
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS
+- Backend: Node.js, Express, MongoDB, Mongoose
+- Forms and validation: React Hook Form, Zod
+- Data fetching: TanStack Query, Axios
+- UI utilities: Framer Motion, Lucide React, Sonner toasts, Recharts
+- Reports: jsPDF, jsPDF AutoTable
 
 ## Project Structure
 
-- `client/` -> React + Vite frontend
-- `server/` -> Express + MongoDB backend
-
-## Run Locally
-
-### 1) Client
-
-```bash
-cd client
-npm install
-npm run dev
+```text
+NewHRMS/
+  client/   React + Vite frontend
+  server/   Express + MongoDB backend
 ```
 
-### 2) Server
+## Features
+
+### Authentication and Roles
+
+- JWT-based authentication
+- Refresh-token cookie support
+- Role-based route access for admin and employee users
+- Protected dashboard layouts for each role
+
+### Employee Management
+
+- Add, edit, view, and manage employees
+- Employee profile page and profile cards
+- Department, designation, employment type, salary, skills, and contact details
+- Admin employee listing with filters and actions
+
+### Leave Management
+
+- Employee leave application flow
+- Leave balance by leave type
+- Leave history with timeline
+- Admin leave approval page
+- Status filters for all, pending, approved, rejected, and cancelled leaves
+- Approve/reject workflow with comments and reasons
+- Automatic balance movement:
+  - On apply: pending leave increases
+  - On approve: pending decreases and used increases
+  - On reject: pending decreases
+  - Dashboard available leave uses `allocated - used - pending`
+
+### Dashboard
+
+- Employee dashboard shows real leave balance, used days, and pending requests
+- Admin dashboard shows latest leave requests and approval counts
+- Dashboard cards use live API data where available
+- Attendance and performance chart widgets
+
+### Notifications
+
+- In-app notification bell in the top navbar
+- Admin receives a notification when an employee submits a leave request
+- Employee receives a notification when a leave request is approved or rejected
+- Unread notification count
+- Mark single notification as read
+- Mark all notifications as read
+- Notification links navigate to leave approvals or leave history
+
+### Settings
+
+- Organization settings
+- Branding settings
+- Leave policy settings
+- Attendance policy settings
+- Notification preferences
+- Security and role settings
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js
+- npm
+- MongoDB running locally or a MongoDB connection string
+
+### 1. Configure Server
+
+Create `server/.env` from `server/.env.example`.
+
+```env
+NODE_ENV=development
+PORT=3000
+API_PREFIX=/api
+API_VERSION=v1
+CLIENT_ORIGIN=http://localhost:5173
+MONGODB_URI=mongodb://127.0.0.1:27017/newhrms
+JWT_ACCESS_SECRET=replace_with_access_secret
+JWT_REFRESH_SECRET=replace_with_refresh_secret
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+REFRESH_COOKIE_NAME=hrms_refresh_token
+COOKIE_SECURE=false
+SEED_ADMIN_EMAIL=admin@newhrms.com
+SEED_ADMIN_PASSWORD=Admin@12345
+```
+
+Install and run the backend:
 
 ```bash
 cd server
@@ -25,10 +114,39 @@ npm install
 npm run dev
 ```
 
-## API Base
+Backend API runs at:
 
-- Base URL: `http://localhost:3000/api/v1`
-- Health: `GET http://localhost:3000/api/v1/health`
+```text
+http://localhost:3000/api/v1
+```
+
+Health check:
+
+```text
+GET http://localhost:3000/api/v1/health
+```
+
+### 2. Configure Client
+
+Create `client/.env` from `client/.env.example`.
+
+```env
+VITE_API_BASE_URL=http://localhost:3000/api/v1
+```
+
+Install and run the frontend:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Frontend runs at:
+
+```text
+http://localhost:5173
+```
 
 ## Demo Login Credentials
 
@@ -42,272 +160,93 @@ npm run dev
 - Email: `employee.guest@newhrms.com`
 - Password: `Employee@123`
 
-## Core Modules
+## Important Frontend Routes
 
-### 1) Employee Dashboard Flow
-A comprehensive employee-facing interface providing access to modules such as attendance, profile settings, and internal dashboards.
+- `/dashboard` - role-based dashboard home
+- `/employees` - admin employee management
+- `/employees/:employeeId` - employee profile
+- `/leaves` - role-based leave redirect
+- `/leaves/apply` - employee apply leave
+- `/leaves/history` - employee leave history
+- `/leaves/balance` - leave balance
+- `/leaves/approvals` - admin approval page
+- `/leaves/analytics` - admin leave analytics
+- `/settings` - role-based settings area
 
-### 2) Leave Management Module
-Implemented leave workflow with role-based access and responsive UI.
+## Main API Routes
 
-### Features
+### Auth
 
-- Apply leave (employee)
-- Approve leave (admin)
-- Reject leave (admin)
-- Leave balance tracking
-- Leave history with timeline view
-- Leave analytics dashboard (admin)
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/refresh`
 
-### Workflow Summary
+### Employees
 
-1. Employee submits leave request
-2. Request goes to `pending`
-3. Admin approves or rejects
-4. Leave balances are updated automatically
-5. Employee can review full leave history and status timeline
+- `GET /api/v1/employees`
+- `POST /api/v1/employees`
+- `GET /api/v1/employees/:employeeId`
+- `PATCH /api/v1/employees/:employeeId`
+- `DELETE /api/v1/employees/:employeeId`
 
-### Main Leave Routes
+### Leaves
 
-Frontend:
-- `/leaves` (role-based redirect)
-- `/leaves/apply`
-- `/leaves/history`
-- `/leaves/balance`
-- `/leaves/approvals` (admin)
-- `/leaves/analytics` (admin)
-
-Backend:
-- `POST /api/v1/leaves` (apply)
-- `POST /api/v1/leaves/:leaveId/approve` (admin)
-- `POST /api/v1/leaves/:leaveId/reject` (admin)
+- `POST /api/v1/leaves`
+- `GET /api/v1/leaves`
+- `GET /api/v1/leaves/:leaveId`
 - `GET /api/v1/leaves/balance`
 - `GET /api/v1/leaves/history/:employeeId?`
-- `GET /api/v1/leaves/analytics/report` (admin)
+- `POST /api/v1/leaves/:leaveId/approve`
+- `POST /api/v1/leaves/:leaveId/reject`
+- `POST /api/v1/leaves/:leaveId/cancel`
+- `GET /api/v1/leaves/approvals/pending-count`
+- `GET /api/v1/leaves/analytics/report`
 
-## In-Depth Feature Flows
+### Notifications
 
-### 1) Apply Leave (Employee)
+- `GET /api/v1/notifications`
+- `PATCH /api/v1/notifications/:notificationId/read`
+- `PATCH /api/v1/notifications/read-all`
 
-**Goal:** Employee submits a leave request with validation and workflow tracking.
+## Leave Workflow
 
-**Frontend flow**
-1. Employee opens `/leaves/apply`.
-2. UI fetches current leave balance via `GET /api/v1/leaves/balance`.
-3. Employee fills reusable `ApplyLeaveForm`:
-   - Leave type
-   - Start and end date
-   - Reason
-4. Form performs client-side checks:
-   - Required fields
-   - End date is after/equal to start date
-   - Reason length minimum
-   - Balance check for paid leave types
-5. On submit, frontend calls `POST /api/v1/leaves`.
-6. Success feedback toast is shown and user is redirected to `/leaves/history`.
+1. Employee applies for leave from `/leaves/apply`.
+2. Backend validates dates, overlapping leaves, and available balance.
+3. Leave is created with `pending` status.
+4. Employee pending balance increases.
+5. Admin receives a notification.
+6. Admin reviews the request from `/leaves/approvals`.
+7. If approved:
+   - Leave status becomes `approved`
+   - Pending balance decreases
+   - Used balance increases
+   - Employee receives an approval notification
+8. If rejected:
+   - Leave status becomes `rejected`
+   - Pending balance decreases
+   - Rejection reason is stored
+   - Employee receives a rejection notification
+9. Employee can view final status in `/leaves/history`.
 
-**Backend flow**
-1. Request passes authentication middleware (`requireAuth`).
-2. Payload is validated by `applyLeaveSchema`.
-3. Service resolves employee profile from authenticated user email.
-4. Server validations:
-   - Date range valid
-   - No past leave application
-   - No overlapping pending/approved leave
-   - Sufficient leave balance (except unpaid leave)
-5. Leave document is created with status `pending`.
-6. Pending count is deducted in leave balance (`leaveTypes.<type>.pending += daysRequested`).
-7. API responds with created leave data.
+## Build
 
-**Data impact**
-- `leaves` collection: new pending leave entry
-- `leave_balances` collection: pending days incremented
+Build the frontend:
 
----
+```bash
+cd client
+npm run build
+```
 
-### 2) Approve Leave (Admin)
+Start the backend normally:
 
-**Goal:** Admin reviews pending requests and approves valid ones.
-
-**Frontend flow**
-1. Admin opens `/leaves/approvals`.
-2. Pending requests are fetched via `GET /api/v1/leaves?status=pending`.
-3. Admin selects a request to view details + timeline.
-4. Admin uses `LeaveApprovalForm` and confirms approval (optional comment).
-5. Frontend calls `POST /api/v1/leaves/:leaveId/approve`.
-6. On success, list refreshes and pending count decreases.
-
-**Backend flow**
-1. Route enforces:
-   - Authenticated user
-   - Role check (`admin`)
-2. Payload validated with `approveLeaveSchema`.
-3. Service checks:
-   - Leave exists
-   - Current status is `pending`
-4. Leave status updates to `approved` with approver + timestamp.
-5. Optional comment is appended to leave comments.
-6. Leave balance updates:
-   - `pending -= daysRequested`
-   - `used += daysRequested`
-7. Response returns updated leave record.
-
-**Data impact**
-- `leaves`: status -> `approved`
-- `leave_balances`: pending to used movement
-
----
-
-### 3) Reject Leave (Admin)
-
-**Goal:** Admin rejects leave request with mandatory reason for traceability.
-
-**Frontend flow**
-1. Admin opens a pending request in `/leaves/approvals`.
-2. Admin switches to reject mode in `LeaveApprovalForm`.
-3. Admin enters rejection reason.
-4. Frontend calls `POST /api/v1/leaves/:leaveId/reject`.
-5. UI updates card/status/timeline after success.
-
-**Backend flow**
-1. Route enforces auth + admin role.
-2. `rejectLeaveSchema` validates `rejectionReason`.
-3. Service checks leave existence and `pending` status.
-4. Leave status set to `rejected` with:
-   - approver
-   - processed timestamp
-   - rejection reason
-5. Leave balance updates:
-   - `pending -= daysRequested`
-   - No increment in `used`
-6. Response returns updated leave.
-
-**Data impact**
-- `leaves`: status -> `rejected` and reason captured
-- `leave_balances`: pending reduced
-
----
-
-### 4) Leave Balances (Employee/Admin)
-
-**Goal:** Show real-time available, used, and pending leave capacity.
-
-**Frontend flow**
-1. User opens `/leaves/balance` (or side panel in apply flow).
-2. Frontend requests `GET /api/v1/leaves/balance`.
-3. UI renders:
-   - Total allocated
-   - Used
-   - Pending
-   - Leave-type cards (annual, sick, casual, etc.)
-4. Available balance logic:
-   - `available = allocated - used - pending`
-
-**Backend flow**
-1. Auth middleware validates requester.
-2. Query schema validates optional `employeeId` and `fiscalYear`.
-3. Service fetches leave balance by employee and fiscal year.
-4. If missing, appropriate not-found response is returned.
-
-**Data source**
-- `leave_balances` with per-leave-type counters:
-  - `allocated`
-  - `used`
-  - `pending`
-  - `carried_over`
-
----
-
-### 5) Leave History + Timeline (Employee/Admin)
-
-**Goal:** Provide complete audit trail of leave lifecycle.
-
-**Frontend flow**
-1. User opens `/leaves/history`.
-2. Frontend fetches paginated leaves via `GET /api/v1/leaves`.
-3. User can filter by status and leave type.
-4. On selecting an item, detail panel shows:
-   - leave metadata
-   - reason
-   - status badge
-   - timeline (applied, approved/rejected, pending state)
-   - comments history
-
-**Backend flow**
-1. Auth middleware validates user.
-2. Query schema validates pagination and filters.
-3. Service applies role-based access:
-   - Employee: own leaves only
-   - Admin: can query broader dataset
-4. Results are sorted by latest application date.
-5. API returns items + pagination meta.
-
-**Audit consistency**
-- Every decision is reflected in timeline-ready fields:
-  - `appliedAt`, `approvedAt`
-  - `appliedBy`, `approvedBy`
-  - `status`, `rejectionReason`
-  - `comments[]`
-
----
-
-### 6) Leave Analytics (Admin)
-
-**Goal:** Give admin actionable insights on leave usage patterns.
-
-**Frontend flow**
-1. Admin opens `/leaves/analytics`.
-2. Frontend requests analytics grouped by:
-   - leave type
-   - status
-3. Dashboard renders:
-   - summary KPIs (requests, total days, average duration)
-   - charts (bar/pie)
-   - insight highlights (most used type, approval rate)
-
-**Backend flow**
-1. Route enforces auth + admin role.
-2. Query validated by `leaveAnalyticsSchema`.
-3. Service builds aggregation pipeline on `leaves`:
-   - Match approved records (and optional date filters)
-   - Group by requested dimension (`leaveType`, `status`, `employee`)
-   - Compute `count` and `totalDays`
-4. Returns aggregated dataset for chart consumption.
-
-**Business value**
-- Detect high leave categories
-- Track policy impact
-- Monitor approval behavior
-- Support staffing planning
-
----
-
-### 7) Role-Based Access Control Matrix
-
-- Employee:
-  - Apply leave
-  - View own balance
-  - View own history and timeline
-  - Cancel own eligible leave
-- Admin:
-  - View pending approvals
-  - Approve/reject leave
-  - View analytics
-  - View broader leave datasets
-
-All protected routes use auth middleware, and admin-sensitive routes additionally enforce role checks.
-
----
-
-### 8) Validation and Error Handling Strategy
-
-- Shared schema validation at API boundary (Zod)
-- Business rule validation in service layer
-- Consistent API response envelope for success/error
-- User-friendly toast messages in frontend
-- Timeline/comments preserve decision context for enterprise auditability
+```bash
+cd server
+npm start
+```
 
 ## Notes
 
-- Admin user is seeded from `server/.env` (`SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`).
+- Restart the backend after adding or changing models/routes.
 - Ensure MongoDB is running before starting the server.
+- The admin seed user is configured from `server/.env`.
+- The notification system stores in-app notifications in MongoDB.

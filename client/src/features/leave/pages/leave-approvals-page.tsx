@@ -12,22 +12,32 @@ import {
 } from "../api/leave-api";
 import { LeaveCard } from "../components/leave-card";
 import { LeaveApprovalForm } from "../components/leave-approval-form";
+import { LeaveStatusBadge } from "../components/leave-status-badge";
 import { LeaveTimeline } from "../components/leave-timeline";
-import { LEAVE_TYPE_LABELS } from "../types/leave";
-import type { Leave } from "../types/leave";
+import { LEAVE_STATUS_CONFIG, LEAVE_TYPE_LABELS } from "../types/leave";
+import type { Leave, LeaveStatus } from "../types/leave";
+
+const STATUS_FILTERS: Array<{ value: "" | LeaveStatus; label: string }> = [
+  { value: "", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "cancelled", label: "Cancelled" },
+];
 
 export function LeaveApprovalsPage() {
   const navigate = useNavigate();
   const [selectedLeaveId, setSelectedLeaveId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<"" | LeaveStatus>("");
 
   const { data: leavesData, isLoading, refetch } = useQuery({
-    queryKey: ["leaves-pending", page],
+    queryKey: ["leaves-approvals", page, statusFilter],
     queryFn: () =>
       listLeaves({
         page,
         limit: 10,
-        status: "pending",
+        ...(statusFilter && { status: statusFilter }),
       }),
   });
 
@@ -63,7 +73,10 @@ export function LeaveApprovalsPage() {
     },
   });
 
-  const pendingCount = leavesData?.meta?.total || 0;
+  const requestCount = leavesData?.meta?.total || 0;
+  const selectedStatusLabel = statusFilter
+    ? LEAVE_STATUS_CONFIG[statusFilter].label.toLowerCase()
+    : "leave";
 
   return (
     <div className="space-y-6">
@@ -78,14 +91,14 @@ export function LeaveApprovalsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leave Approvals</h1>
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {pendingCount > 0 ? (
+            {requestCount > 0 ? (
               <>
                 <AlertCircle className="inline h-4 w-4 text-amber-600 dark:text-amber-400" />
                 {" "}
-                {pendingCount} pending leave{pendingCount !== 1 ? "s" : ""} to review
+                {requestCount} {selectedStatusLabel} request{requestCount !== 1 ? "s" : ""} found
               </>
             ) : (
-              "All leaves have been reviewed"
+              "No leave requests found"
             )}
           </p>
         </div>
@@ -121,6 +134,9 @@ export function LeaveApprovalsPage() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                     {LEAVE_TYPE_LABELS[selectedLeave.leaveType]}
                   </h2>
+                  <div className="mt-3">
+                    <LeaveStatusBadge status={selectedLeave.status} />
+                  </div>
                   <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                     {format(new Date(selectedLeave.startDate), "MMM d, yyyy")} -{" "}
                     {format(new Date(selectedLeave.endDate), "MMM d, yyyy")}
@@ -153,23 +169,42 @@ export function LeaveApprovalsPage() {
               {/* Approval Actions */}
               <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-900">
                 <h3 className="font-semibold text-gray-900 dark:text-white">Decision</h3>
-                <div className="mt-4">
-                  <LeaveApprovalForm
-                    onApprove={(comment) =>
-                      approveLeave({
-                        leaveId: selectedLeave._id,
-                        comment,
-                      })
-                    }
-                    onReject={(reason) =>
-                      rejectLeave({
-                        leaveId: selectedLeave._id,
-                        reason,
-                      })
-                    }
-                    isLoading={isApprovingPending || isRejectingPending}
-                  />
-                </div>
+                {selectedLeave.status === "pending" ? (
+                  <div className="mt-4">
+                    <LeaveApprovalForm
+                      onApprove={(comment) =>
+                        approveLeave({
+                          leaveId: selectedLeave._id,
+                          comment,
+                        })
+                      }
+                      onReject={(reason) =>
+                        rejectLeave({
+                          leaveId: selectedLeave._id,
+                          reason,
+                        })
+                      }
+                      isLoading={isApprovingPending || isRejectingPending}
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-950/50 dark:text-gray-300">
+                    <div className="flex items-center justify-between gap-3">
+                      <span>Status</span>
+                      <LeaveStatusBadge status={selectedLeave.status} />
+                    </div>
+                    {selectedLeave.approvedAt && (
+                      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        Processed on {format(new Date(selectedLeave.approvedAt), "MMM d, yyyy HH:mm")}
+                      </p>
+                    )}
+                    {selectedLeave.approvedBy && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        By {selectedLeave.approvedBy.firstName} {selectedLeave.approvedBy.lastName}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Info Card */}
@@ -187,6 +222,30 @@ export function LeaveApprovalsPage() {
       ) : (
         // List view
         <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {STATUS_FILTERS.map((filter) => {
+              const isActive = statusFilter === filter.value;
+
+              return (
+                <button
+                  key={filter.value || "all"}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter(filter.value);
+                    setPage(1);
+                  }}
+                  className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-300"
+                      : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
+
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -199,7 +258,7 @@ export function LeaveApprovalsPage() {
           ) : !leavesData?.items || leavesData.items.length === 0 ? (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-12 text-center dark:border-emerald-800 dark:bg-emerald-950/50">
               <p className="text-emerald-600 dark:text-emerald-400">
-                ✓ All leave requests have been reviewed
+                No leave requests match this status
               </p>
             </div>
           ) : (

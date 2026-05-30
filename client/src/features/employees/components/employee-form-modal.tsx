@@ -19,6 +19,7 @@ const employeeFormSchema = z.object({
   firstName: z.string().trim().min(2, "Minimum 2 characters").max(60),
   lastName: z.string().trim().min(2, "Minimum 2 characters").max(60),
   email: z.string().trim().email("Enter a valid email"),
+  password: z.string().max(72).or(z.literal("")),
   phone: z
     .string()
     .trim()
@@ -55,6 +56,7 @@ const defaultValues: EmployeeFormValues = {
   firstName: "",
   lastName: "",
   email: "",
+  password: "",
   phone: "",
   department: "",
   designation: "",
@@ -82,6 +84,7 @@ export function EmployeeFormModal({
     handleSubmit,
     formState: { errors },
     reset,
+    setError,
   } = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues,
@@ -102,6 +105,7 @@ export function EmployeeFormModal({
       firstName: initialEmployee.firstName,
       lastName: initialEmployee.lastName,
       email: initialEmployee.email,
+      password: "",
       phone: initialEmployee.phone || "",
       department: initialEmployee.department,
       designation: initialEmployee.designation,
@@ -120,6 +124,14 @@ export function EmployeeFormModal({
   }, [initialEmployee, open, reset]);
 
   const submitForm = async (values: EmployeeFormValues) => {
+    if (!initialEmployee && values.password.length < 8) {
+      setError("password", {
+        type: "manual",
+        message: "Minimum 8 characters",
+      });
+      return;
+    }
+
     const payload: EmployeePayload = {
       employeeCode: values.employeeCode,
       firstName: values.firstName,
@@ -146,6 +158,10 @@ export function EmployeeFormModal({
           ? values.salary
           : null,
     };
+
+    if (!initialEmployee) {
+      payload.password = values.password;
+    }
 
     await onSubmit(payload);
   };
@@ -175,6 +191,17 @@ export function EmployeeFormModal({
           <Field label="Work Email" error={errors.email?.message}>
             <Input placeholder="employee@company.com" {...register("email")} />
           </Field>
+
+          {!initialEmployee ? (
+            <Field label="Login Password" error={errors.password?.message}>
+              <Input
+                type="password"
+                autoComplete="new-password"
+                placeholder="Minimum 8 characters"
+                {...register("password")}
+              />
+            </Field>
+          ) : null}
 
           <Field label="First Name" error={errors.firstName?.message}>
             <Input {...register("firstName")} />

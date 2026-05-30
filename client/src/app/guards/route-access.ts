@@ -16,7 +16,6 @@ const DASHBOARD_ROUTE_RULES: AccessRule[] = [
   { pathPrefix: "/leaves/approvals", allow: [ROLES.ADMIN] },
   { pathPrefix: "/leaves/analytics", allow: [ROLES.ADMIN] },
   { pathPrefix: "/leaves/apply", allow: [ROLES.EMPLOYEE] },
-  { pathPrefix: "/reports", allow: [ROLES.ADMIN] },
   { pathPrefix: "/me/profile", allow: [ROLES.EMPLOYEE] },
 
   // Admin-only settings
