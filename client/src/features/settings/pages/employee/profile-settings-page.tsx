@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 import { fetchMeSettings, patchMeAvatar, patchMeProfile } from "../../api/settings-api";
 import { SettingsSection } from "../../components/settings-section";
@@ -25,6 +26,7 @@ type FormValues = z.infer<typeof schema>;
 
 export function ProfileSettingsPage() {
   const queryClient = useQueryClient();
+  const { updateUser } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["settings-me"],
     queryFn: fetchMeSettings,
@@ -47,8 +49,13 @@ export function ProfileSettingsPage() {
 
   const saveMutation = useMutation({
     mutationFn: (payload: FormValues) => patchMeProfile(payload),
-    onSuccess: () => {
+    onSuccess: (updatedSettings) => {
       toast.success("Profile saved");
+      updateUser({
+        firstName: updatedSettings.user.firstName,
+        lastName: updatedSettings.user.lastName,
+        avatarUrl: updatedSettings.user.avatarUrl,
+      });
       queryClient.invalidateQueries({ queryKey: ["settings-me"] });
     },
     onError: () => toast.error("Could not save profile"),
@@ -56,8 +63,9 @@ export function ProfileSettingsPage() {
 
   const avatarMutation = useMutation({
     mutationFn: (avatarUrl: string) => patchMeAvatar(avatarUrl),
-    onSuccess: () => {
+    onSuccess: (updatedSettings) => {
       toast.success("Photo updated");
+      updateUser({ avatarUrl: updatedSettings.user.avatarUrl });
       queryClient.invalidateQueries({ queryKey: ["settings-me"] });
     },
     onError: () => toast.error("Could not update photo"),

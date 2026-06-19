@@ -21,6 +21,7 @@ function buildAuthUser(user) {
     role: user.role,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatarUrl: user.avatarUrl || "",
   };
 }
 

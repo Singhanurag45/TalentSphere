@@ -6,6 +6,7 @@ export type AuthUser = {
   firstName: string;
   lastName: string;
   role: AppRole;
+  avatarUrl?: string;
 };
 
 export type LoginInput = {

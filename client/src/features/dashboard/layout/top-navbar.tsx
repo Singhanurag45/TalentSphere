@@ -54,6 +54,9 @@ export function TopNavbar() {
 
   const pageTitle =
     user ? resolvePageTitle(location.pathname, user.role) : "Sign in";
+  const initials = user
+    ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+    : "";
   const { register, handleSubmit, formState } = useForm<SearchFormInput>({
     resolver: zodResolver(searchSchema),
     defaultValues: { query: "" },
@@ -172,11 +175,17 @@ export function TopNavbar() {
             className="h-11 gap-2 px-2.5"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            <img
-              src="https://i.pravatar.cc/80?img=12"
-              alt="Profile"
-              className="h-8 w-8 rounded-full object-cover"
-            />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                initials || "U"
+              )}
+            </span>
             <span className="hidden text-sm md:block">
               {user ? `${user.firstName} ${user.lastName}` : "Profile"}
             </span>

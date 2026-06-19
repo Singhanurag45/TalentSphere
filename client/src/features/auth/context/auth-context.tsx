@@ -10,6 +10,7 @@ type AuthContextValue = {
   isBootstrapping: boolean;
   login: (payload: LoginInput) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (patch: Partial<AuthUser>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -50,6 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await logoutApi();
         setUser(null);
         toast.success("Logged out");
+      },
+      updateUser: (patch) => {
+        setUser((currentUser) =>
+          currentUser ? { ...currentUser, ...patch } : currentUser,
+        );
       },
     }),
     [user, isBootstrapping]

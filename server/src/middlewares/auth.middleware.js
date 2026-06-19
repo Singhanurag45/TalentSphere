@@ -19,10 +19,12 @@ export async function requireAuth(req, _res, next) {
     }
     req.auth = {
       sub: user._id.toString(),
+      id: user._id.toString(),
       role: user.role,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      avatarUrl: user.avatarUrl || "",
     };
     return next();
   } catch {
